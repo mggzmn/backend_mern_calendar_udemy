@@ -3,13 +3,26 @@
     host + /api/auth
  */
 const { Router } = require('express');
+const { check } = require('express-validator');
 const router = Router();
-const { createUser, authUser, renew } = require('../controllers/auth')
 
-router.post('/new', createUser);
+const { createUser, authUser, renewToken } = require('../controllers/auth');
 
-router.post('/', authUser);
+router.post('/new',
+    [//middlewares
+        check('name', 'El nombre es obligatorio').not().isEmpty(),
+        check('email', 'EL email es obligatorio').isEmail(),
+        check('password', 'El password debe ser de 6 caracteres').isLength({ min: 6 })
+    ],
+    createUser);
 
-router.get('/renew', renew);
+router.post('/',
+    [//middlewares
+        check('email', 'EL email es obligatorio').isEmail(),
+        check('password', 'El password debe ser de 6 caracteres').isLength({ min: 6 })
+    ]
+    , authUser);
+
+router.get('/renew', renewToken);
 
 module.exports = router;
