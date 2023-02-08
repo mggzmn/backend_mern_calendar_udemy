@@ -1,6 +1,7 @@
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
 const Usuario = require('../models/Usuario');
+const { generarJWT } = require('../helpers/jwt');
 
 const createUser = async (req, res = response) => {
     const { email, password } = req.body;
@@ -15,12 +16,14 @@ const createUser = async (req, res = response) => {
         }
         usuario = new Usuario(req.body);
         const salt = bcrypt.genSaltSync();
-        usuario.password = bcrypt.hashSync(password, salt)
+        usuario.password = bcrypt.hashSync(password, salt);
         await usuario.save();
+        const token = await generarJWT(usuario.id, usuario.name);
         res.status(201).json({
             ok: true,
             uid: usuario.id,
-            name: usuario.name
+            name: usuario.name,
+            token
 
         });
     } catch (error) {
@@ -50,11 +53,13 @@ const authUser = async (req, res = response) => {
                 msg: "Password no válida"
             });
         }
+        const token = await generarJWT(usuario.id, usuario.name);
         res.status(201).json({
             ok: true,
             msg: "login",
             uid: usuario.id,
-            name: usuario.name
+            name: usuario.name,
+            token
         })
     } catch (error) {
         console.log(error);
