@@ -1,7 +1,12 @@
 const express = require('express');
 require('dotenv').config();
+const { dbConnection } = require('./database/config')
 
 const app = express();
+
+//DB
+dbConnection();
+
 //directorio público
 app.use(express.static('public'));
 
